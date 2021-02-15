@@ -308,4 +308,4 @@ if __name__ == '__main__':
 
     min_elem, index_of_min = find_max_value(f, S_arr=S, inverse=True)
     print('\nIterations completed:', iterations)
-    print('Lowest function value: ', min_elem)
+    print('Lowest function value: ', round(min_elem, 3))
