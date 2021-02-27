@@ -110,7 +110,9 @@ def find_n_max_values(f, S_arr, n=1, inverse=False, verbose=0):
     else:
         index = np.argsort(values)[-n:]
 
-    elements = values[index]
+    elements = []
+    for idx in index:
+        elements.append(values[idx])
 
     if verbose == 1:
         print('Values: ', values)
@@ -120,7 +122,7 @@ def find_n_max_values(f, S_arr, n=1, inverse=False, verbose=0):
     return elements, index
 
 
-def find_center_of_gravity(index_to_remove: int, S_arr, n, verbose=0):
+def find_center_of_gravity(index_to_remove: int, S_arr, n=1, verbose=0):
     """
     Function finds simplex center of gravity with/without index to remove column
 
@@ -141,7 +143,7 @@ def find_center_of_gravity(index_to_remove: int, S_arr, n, verbose=0):
 
     if index_to_remove != -1:
         to_take[index_to_remove] = False
-
+    print(to_take)
     center_of_gravity = np.average(S_arr[:, to_take], axis=1)
 
     if verbose == 1:
@@ -201,7 +203,7 @@ def reduction(index_of_min, S_arr, n, verbose=0):
     S_arr[:, to_take] = x_r[:, np.newaxis] + 0.5 * (S_arr[:, to_take] - x_r[:, np.newaxis])
 
 
-def stop_condition(S_arr, epsilon, verbose=0):
+def stop_condition(S_arr, epsilon, n, verbose=0):
     """
     Checking for stop algorithm condition
 
@@ -216,7 +218,7 @@ def stop_condition(S_arr, epsilon, verbose=0):
     out: bool
         if abs of difference is less < epsilon, then we stop
     """
-    center_of_gravity = find_center_of_gravity(-1, S_arr=S_arr)
+    center_of_gravity = find_center_of_gravity(-1, S_arr=S_arr, n=n)
 
     if verbose == 1:
         print('Center of gravity: ', center_of_gravity)
@@ -252,13 +254,13 @@ def change_size(center_of_gravity, vector, coeff):
 if __name__ == "__main__":
     verbose = 1
     n = 2
-    length = 1
+    length = 8
     epsilon = 0.1
 
-    start_vertex = np.array([1, 1])  # start vector (should be n - dimensioned)
+    start_vertex = np.array([16, 16])  # start vector (should be n - dimensioned)
 
     print('Start vertex:', start_vertex)
-    S = create_start_vectors(start_point=start_vertex)
+    S = create_start_vectors(start_point=start_vertex, length=length)
 
     if n == 2:  # if dimension = 2 we could plot function
         x_line = np.arange(-10, 10, 0.05)
@@ -271,12 +273,23 @@ if __name__ == "__main__":
     iterations = 0
     color = 'black'
 
-    while not stop_condition(S, epsilon):
+    while not stop_condition(S, epsilon, n=n):
         iterations += 1
-        max_elems, indexes = find_n_max_values(S, 2)
+
+        betta = 2.
+        gamma = 0.5
+        print(S)
+        max_elems, indexes = find_n_max_values(f, S, 2)
+        # Step 3
+        # ---------------------------------------
 
         max_elem, second_max_elem = max_elems
         max_elem_index, second_max_elem_index = indexes
+
+        low_elems, indexes = find_n_max_values(f, S, 1, True)
+        low_elem, low_elem_index = low_elems[0], indexes[0]
+
+        # ---------------------------------------
 
         horisontal = S[0]
         vertical = S[1]
@@ -291,13 +304,74 @@ if __name__ == "__main__":
             print('Iteration:', iterations)
             print('Max element: ', max_elem)
 
-        center_of_gravity = find_center_of_gravity(max_elem_index, S)
+
+        # Step 4
+        # ---------------------------------------
+        center_of_gravity = find_center_of_gravity(max_elem_index, S, n=2)
+        # ---------------------------------------
+
+        # Step 5
+        # ---------------------------------------
         x_new = find_reflection(S[:, max_elem_index], center_of_gravity)
         x_new_value = f(*x_new)
+        # ---------------------------------------
 
         if verbose == 1:
             print('Center of gravity:', center_of_gravity)
             print('X new:', x_new)
             print('X new value:', x_new_value)
+
+        # Step 6
+        # ---------------------------------------
+        if x_new_value < max_elem:
+            S[:, max_elem_index] = x_new
+
+            # Step 7
+            # ---------------------------------------
+            if x_new_value < low_elem:
+                # If ok, perform stretching
+                x_new_streched = change_size(center_of_gravity, x_new, betta)
+                x_new_streched_value = f(*x_new_streched)
+
+                # Step 8
+                # ---------------------------------------
+                if x_new_streched_value < x_new_value:
+                    # if ok, set x_new_stretched as x_new and go again --> 12
+                    S[:, max_elem_index] = x_new_streched
+                    continue
+
+        # Step 9
+        # ---------------------------------------
+        if second_max_elem < x_new_value and x_new_value < max_elem:
+            x_new_reduced = change_size(center_of_gravity, x_new)
+            x_new_reduced_value = f(x_new_reduced)
+            # Step 10
+            # ---------------------------------------
+            if x_new_reduced_value < x_new_value:
+                # if ok, set x_new_reduced as x_new and go again --> 12
+                S[:, max_elem_index] = x_new_reduced
+                continue
+
+        # Step 11
+        # ---------------------------------------
+
+        min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
+        min_el, index_of_min_el = min_el[0], index_of_min_el[0]
+
+        reduction(index_of_min_el, S, n)
+
+
+
+    if n == 2:
+        plt.show()
+
+    print('Stop condition reached!\n')
+    stop_condition(verbose=2, S_arr=S, n=2, epsilon=epsilon)
+
+    min_elem, index_of_min = find_n_max_values(f, S_arr=S, inverse=True)
+    min_elem = min_elem[0]
+    print('\nIterations completed:', iterations)
+    print('Lowest function value: ', round(min_elem, 3))
+
 
 
