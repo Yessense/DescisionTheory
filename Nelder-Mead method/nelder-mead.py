@@ -104,7 +104,7 @@ def find_n_max_values(f, S_arr, n=1, inverse=False, verbose=0):
     """
 
     values = [f(*X) for X in S_arr.T]
-
+    print(values)
     if inverse:
         index = np.argsort(values)[:n]
     else:
@@ -143,7 +143,6 @@ def find_center_of_gravity(index_to_remove: int, S_arr, n=1, verbose=0):
 
     if index_to_remove != -1:
         to_take[index_to_remove] = False
-    print(to_take)
     center_of_gravity = np.average(S_arr[:, to_take], axis=1)
 
     if verbose == 1:
@@ -272,23 +271,26 @@ if __name__ == "__main__":
 
     iterations = 0
     color = 'black'
+    betta = 2.
+    gamma = 0.5
 
     while not stop_condition(S, epsilon, n=n):
         iterations += 1
 
-        betta = 2.
-        gamma = 0.5
         print(S)
         max_elems, indexes = find_n_max_values(f, S, 2)
         # Step 3
+        # find 3 points 2 max, 1 lowest
         # ---------------------------------------
 
-        max_elem, second_max_elem = max_elems
-        max_elem_index, second_max_elem_index = indexes
+
+        second_max_elem, max_elem = max_elems
+        second_max_elem_index, max_elem_index= indexes
 
         low_elems, indexes = find_n_max_values(f, S, 1, True)
         low_elem, low_elem_index = low_elems[0], indexes[0]
 
+        print(max_elem_index, second_max_elem_index, low_elem_index)
         # ---------------------------------------
 
         horisontal = S[0]
@@ -306,11 +308,13 @@ if __name__ == "__main__":
 
 
         # Step 4
+        # find center of gravity
         # ---------------------------------------
         center_of_gravity = find_center_of_gravity(max_elem_index, S, n=2)
         # ---------------------------------------
 
         # Step 5
+        # find reflection
         # ---------------------------------------
         x_new = find_reflection(S[:, max_elem_index], center_of_gravity)
         x_new_value = f(*x_new)
@@ -320,6 +324,34 @@ if __name__ == "__main__":
             print('Center of gravity:', center_of_gravity)
             print('X new:', x_new)
             print('X new value:', x_new_value)
+
+        # if x_new_value < low_elem:
+        #     x_new_streched = change_size(center_of_gravity, x_new, betta)
+        #     x_new_streched_value = f(*x_new_streched)
+        #
+        #     if x_new_streched_value < low_elem:
+        #         S[:, max_elem_index] = x_new_streched
+        #     else:
+        #         S[:, max_elem_index] = x_new
+        #     continue
+        # elif (low_elem < x_new_value) and (x_new_value < second_max_elem):
+        #     S[:, max_elem_index] = x_new
+        #     continue
+        # elif (second_max_elem < x_new_value) and (x_new_value < max_elem_index):
+        #     S[:, max_elem_index] = x_new
+        # else:
+        #     pass
+        #
+        # x_s = change_size(center_of_gravity, S[:, max_elem_index], gamma)
+        # x_s_value = f(*x_s)
+        #
+        # if x_s_value < f(*S[:, max_elem_index]):
+        #     S[:, max_elem_index] = x_s
+        # else:
+        #     min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
+        #     min_el, index_of_min_el = min_el[0], index_of_min_el[0]
+        #
+        #     reduction(index_of_min_el, S, n)
 
         # Step 6
         # ---------------------------------------
@@ -338,13 +370,14 @@ if __name__ == "__main__":
                 if x_new_streched_value < x_new_value:
                     # if ok, set x_new_stretched as x_new and go again --> 12
                     S[:, max_elem_index] = x_new_streched
-                    continue
+                continue
+
 
         # Step 9
         # ---------------------------------------
         if second_max_elem < x_new_value and x_new_value < max_elem:
-            x_new_reduced = change_size(center_of_gravity, x_new)
-            x_new_reduced_value = f(x_new_reduced)
+            x_new_reduced = change_size(center_of_gravity, x_new, gamma)
+            x_new_reduced_value = f(*x_new_reduced)
             # Step 10
             # ---------------------------------------
             if x_new_reduced_value < x_new_value:
