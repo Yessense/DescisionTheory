@@ -224,9 +224,14 @@ def stop_condition(S_arr, epsilon, n, verbose=0):
 
     absolute = S_arr - center_of_gravity[:, np.newaxis]
 
+    print(absolute)
     if verbose == 1:
         print('Difference:')
         print(absolute)
+
+    # sum = 0
+    # for i in range(S_arr.shape[1]):
+    #     sum += f(S_arr[:,i]) - f()
 
     absolute = absolute ** 2
 
