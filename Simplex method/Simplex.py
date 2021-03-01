@@ -18,6 +18,8 @@ def f(x_1, x_2):
     out: float
 
     """
+    # out = 3 * x_1 ** 2 + x_1 * x_2 + 3 * x_2 ** 2
+    # out -= 8 * x_1
     out = 2.9 * x_1 ** 2 + 0.8 * x_1 * x_2
     out += 3.3 * x_2 ** 2 - 1.5 * x_1 + 3.1 * x_2
     return out

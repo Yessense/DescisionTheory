@@ -6,6 +6,7 @@ from autograd import jacobian
 import autograd.numpy as np
 from numpy.linalg.linalg import norm
 
+
 def f(x):
     """
     Your function to compute
@@ -40,12 +41,11 @@ if __name__ == "__main__":
     grad = egrad(f)
     descent_p = np.zeros(n)
     betta = 0
-    x = np.array([-0.1, -0.1], dtype=np.float32)
-
+    x = np.array([8., 8.], dtype=np.float32)
 
     if n == 2:  # if dimension = 2 we could plot function
-        x_line = np.arange(-1, 1, 0.01)
-        y_line = np.arange(-1, 1, 0.01)
+        x_line = np.arange(-10, 10, 0.01)
+        y_line = np.arange(-10, 10, 0.01)
         x_grid, y_grid = np.meshgrid(x_line, y_line, sparse=True)
         function_values = f([x_grid, y_grid])
 
@@ -74,15 +74,14 @@ if __name__ == "__main__":
         if stop_condition(grad(x), epsilon):
             break
 
-        step = (grad(x) @ grad(x)) / ((H_f(x) @ grad(x) ) @ grad(x))
+        step = (grad(x) @ grad(x)) / ((H_f(x) @ grad(x)) @ grad(x))
         if verbose == 1:
             print(f'Step: {step}')
-
 
         descent = - grad(x)
 
         if iteration > 1:
-            betta = norm(descent_p) / norm(descent)
+            betta = norm(descent) / norm(descent_p)
 
         if verbose == 1:
             print(f'Betta: {betta}')
@@ -94,9 +93,8 @@ if __name__ == "__main__":
 
         descent_p = descent
 
-
         if n == 2:
-            plt.plot([x[0], x_new[0]],[x[1], x_new[1]], 'o-',color=color, lw=0.1, markersize=1)
+            plt.plot([x[0], x_new[0]], [x[1], x_new[1]], 'o-', color=color, lw=0.1, markersize=1)
         x = x_new
 
         if verbose == 1:
@@ -104,5 +102,5 @@ if __name__ == "__main__":
             print('End of iteration')
             print('-' * 40)
 
-plt.scatter(x[0],x[1])
+plt.scatter(x[0], x[1])
 plt.show()
