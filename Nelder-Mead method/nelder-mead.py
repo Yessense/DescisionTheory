@@ -17,10 +17,10 @@ def f(x_1, x_2):
     out: float
 
     """
-    out = 12/5 + 13/10 * x_1 + 27/10 * x_2 ** 2 + 29/10 * x_2
-    out += 7/5 * x_1 ** 2 - 6/5 * x_1 * x_2
-    # out = 2.9 * x_1 ** 2 + 0.8 * x_1 * x_2
-    # out += 3.3 * x_2 ** 2 - 1.5 * x_1 + 3.1 * x_2
+    # out = 12/5 + 13/10 * x_1 + 27/10 * x_2 ** 2 + 29/10 * x_2
+    # out += 7/5 * x_1 ** 2 - 6/5 * x_1 * x_2
+    out = 2.9 * x_1 ** 2 + 0.8 * x_1 * x_2
+    out += 3.3 * x_2 ** 2 - 1.5 * x_1 + 3.1 * x_2
     return out
 
 
@@ -247,7 +247,7 @@ def change_size(center_of_gravity, vector, coeff):
 if __name__ == "__main__":
     verbose = 1
     n = 2
-    length = 8
+    length = 0.4
     epsilon = 0.1
 
     start_vertex = np.array([2, 2])  # start vector (should be n - dimensioned)
@@ -318,74 +318,74 @@ if __name__ == "__main__":
             print('X new value:', x_new_value)
 
         # Second variant
-        # # ----------------------------------------
-        # if x_new_value < low_elem:
-        #     x_new_streched = change_size(center_of_gravity, x_new, betta)
-        #     x_new_streched_value = f(*x_new_streched)
-        #
-        #     if x_new_streched_value < low_elem:
-        #         S[:, max_elem_index] = x_new_streched
-        #     else:
-        #         S[:, max_elem_index] = x_new
-        #     continue
-        # elif (low_elem < x_new_value) and (x_new_value < second_max_elem):
-        #     S[:, max_elem_index] = x_new
-        #     continue
-        # elif (second_max_elem < x_new_value) and (x_new_value < max_elem_index):
-        #     S[:, max_elem_index] = x_new
-        # else:
-        #     pass
-        #
-        # x_s = change_size(center_of_gravity, S[:, max_elem_index], gamma)
-        # x_s_value = f(*x_s)
-        #
-        # if x_s_value < f(*S[:, max_elem_index]):
-        #     S[:, max_elem_index] = x_s
-        # else:
-        #     min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
-        #     min_el, index_of_min_el = min_el[0], index_of_min_el[0]
-        #
-        #     reduction(index_of_min_el, S, n)
-        # ---------------------------------------
+        # ----------------------------------------
+        if x_new_value < low_elem:
+            x_new_streched = change_size(center_of_gravity, x_new, betta)
+            x_new_streched_value = f(*x_new_streched)
 
-        # Step 6
-        # ---------------------------------------
-        if x_new_value < max_elem:
+            if x_new_streched_value < low_elem:
+                S[:, max_elem_index] = x_new_streched
+            else:
+                S[:, max_elem_index] = x_new
+            continue
+        elif (low_elem < x_new_value) and (x_new_value < second_max_elem):
             S[:, max_elem_index] = x_new
+            continue
+        elif (second_max_elem < x_new_value) and (x_new_value < max_elem_index):
+            S[:, max_elem_index] = x_new
+        else:
+            pass
 
-            # Step 7
-            # ---------------------------------------
-            if x_new_value < low_elem:
-                # If ok, perform stretching
-                x_new_streched = change_size(center_of_gravity, x_new, betta)
-                x_new_streched_value = f(*x_new_streched)
+        x_s = change_size(center_of_gravity, S[:, max_elem_index], gamma)
+        x_s_value = f(*x_s)
 
-                # Step 8
-                # ---------------------------------------
-                if x_new_streched_value < x_new_value:
-                    # if ok, set x_new_stretched as x_new and go again --> 12
-                    S[:, max_elem_index] = x_new_streched
-                continue
+        if x_s_value < f(*S[:, max_elem_index]):
+            S[:, max_elem_index] = x_s
+        else:
+            min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
+            min_el, index_of_min_el = min_el[0], index_of_min_el[0]
 
-        # Step 9
-        # ---------------------------------------
-        if second_max_elem < x_new_value and x_new_value < max_elem:
-            x_new_reduced = change_size(center_of_gravity, x_new, gamma)
-            x_new_reduced_value = f(*x_new_reduced)
-            # Step 10
-            # ---------------------------------------
-            if x_new_reduced_value < x_new_value:
-                # if ok, set x_new_reduced as x_new and go again --> 12
-                S[:, max_elem_index] = x_new_reduced
-                continue
-
-        # Step 11
+            reduction(index_of_min_el, S, n)
         # ---------------------------------------
 
-        min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
-        min_el, index_of_min_el = min_el[0], index_of_min_el[0]
-
-        reduction(index_of_min_el, S, n)
+        # # Step 6
+        # # ---------------------------------------
+        # if x_new_value < max_elem:
+        #     S[:, max_elem_index] = x_new
+        #
+        #     # Step 7
+        #     # ---------------------------------------
+        #     if x_new_value < low_elem:
+        #         # If ok, perform stretching
+        #         x_new_streched = change_size(center_of_gravity, x_new, betta)
+        #         x_new_streched_value = f(*x_new_streched)
+        #
+        #         # Step 8
+        #         # ---------------------------------------
+        #         if x_new_streched_value < x_new_value:
+        #             # if ok, set x_new_stretched as x_new and go again --> 12
+        #             S[:, max_elem_index] = x_new_streched
+        #         continue
+        #
+        # # Step 9
+        # # ---------------------------------------
+        # if second_max_elem < x_new_value and x_new_value < max_elem:
+        #     x_new_reduced = change_size(center_of_gravity, x_new, gamma)
+        #     x_new_reduced_value = f(*x_new_reduced)
+        #     # Step 10
+        #     # ---------------------------------------
+        #     if x_new_reduced_value < x_new_value:
+        #         # if ok, set x_new_reduced as x_new and go again --> 12
+        #         S[:, max_elem_index] = x_new_reduced
+        #         continue
+        #
+        # # Step 11
+        # # ---------------------------------------
+        #
+        # min_el, index_of_min_el = find_n_max_values(f, S, 1, True)
+        # min_el, index_of_min_el = min_el[0], index_of_min_el[0]
+        #
+        # reduction(index_of_min_el, S, n)
 
     if n == 2:
         plt.show()

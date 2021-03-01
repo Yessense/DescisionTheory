@@ -202,10 +202,14 @@ def stop_condition(S_arr, epsilon, verbose=0):
 
 
     f_c = f(*center_of_gravity)
+    for i in range(S_arr.shape[1]):
+        if verbose == 1:
+            print(f'f(Center of gravity) - f({i}): {abs(f_c - f(*S_arr[:, i])):.4f} < epsilon = {abs(f_c - f(*S_arr[:,i]) < epsilon)}')
 
     for i in range(S_arr.shape[1]):
         if abs(f_c - f(*S_arr[:,i]) >= epsilon):
             if verbose == 1:
+                print(f'f(Center of gravity) - f({i}): {abs(f_c - f(*S_arr[:,i]))}')
                 print(abs(f_c - f(*S_arr[:,i]) >= epsilon))
             return False
     return True
@@ -252,6 +256,11 @@ if __name__ == '__main__':
     print('Start vertex:', start_vertex)
     S = create_start_vectors(start_point=start_vertex)
 
+    if verbose == 1:
+        print('Start coordinates:')
+        print(S)
+
+
     if n == 2: # if dimension = 2 we could plot function
         x_line = np.arange(-10, 10, 0.05)
         y_line = np.arange(-10, 10, 0.05)
@@ -262,7 +271,7 @@ if __name__ == '__main__':
 
     iterations = 0
     color = 'black'
-    while not stop_condition(S, epsilon=epsilon):
+    while not stop_condition(S, epsilon=epsilon, verbose=1):
         iterations += 1
         max_elem, index_of_max = find_max_value(f, S_arr=S, verbose=0)
 
@@ -278,6 +287,7 @@ if __name__ == '__main__':
             print('----------------------')
             print('Iteration:', iterations)
             print('Max element: ', max_elem)
+            print('Index of max elem:',  index_of_max)
 
         center_of_gravity = find_center_of_gravity(index_of_max, S_arr=S, verbose=0)
         x_new = find_reflection(S[:, index_of_max], center_of_gravity)
