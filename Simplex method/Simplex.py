@@ -18,6 +18,10 @@ def f(x_1, x_2):
     out: float
 
     """
+
+
+    # out = 12/5 + 13/10 * x_1 + 27/10 * x_2 ** 2 + 29/10 * x_2
+    # out += 7/5 * x_1 ** 2 - 6/5 * x_1 * x_2
     # out = 3 * x_1 ** 2 + x_1 * x_2 + 3 * x_2 ** 2
     # out -= 8 * x_1
     out = 2.9 * x_1 ** 2 + 0.8 * x_1 * x_2
@@ -176,7 +180,7 @@ def find_reflection(x, center_of_gravity):
     return 2 * center_of_gravity - x
 
 
-def stop_condition(S_arr, verbose=0):
+def stop_condition(S_arr, epsilon, verbose=0):
     """
     Checking for stop algorithm condition
 
@@ -196,26 +200,16 @@ def stop_condition(S_arr, verbose=0):
     if verbose == 1:
         print('Center of gravity: ', center_of_gravity)
 
-    absolute = S_arr - center_of_gravity[:, np.newaxis]
 
-    if verbose == 1:
-        print('Difference:')
-        print(absolute)
+    f_c = f(*center_of_gravity)
 
-    absolute = absolute ** 2
+    for i in range(S_arr.shape[1]):
+        if abs(f_c - f(*S_arr[:,i]) >= epsilon):
+            if verbose == 1:
+                print(abs(f_c - f(*S_arr[:,i]) >= epsilon))
+            return False
+    return True
 
-    if verbose == 1:
-        print('Squared:')
-        print(absolute)
-
-    absolute = np.sum(absolute, axis=0)
-
-    if verbose == 1:
-        print('Sum:')
-        print(absolute)
-    if verbose == 2:
-        print('Absolute difference for all values:', np.round(absolute, 3))
-    return np.all(absolute < epsilon)
 
 
 def reduction(index_of_min, S_arr, verbose=0):
@@ -250,10 +244,10 @@ def reduction(index_of_min, S_arr, verbose=0):
 if __name__ == '__main__':
     verbose = 1 # verbose parameter (could be 0, 1, 2) 0 - zero verbose, 1 - standard, 2 - special
     n = 2 # dimension
-    length = 8. # length of simplex edge
+    length = 1 # length of simplex edge
     epsilon = 0.1 # precision
 
-    start_vertex = np.array([1, 1]) # start vector (should be n - dimensioned)
+    start_vertex = np.array([0, 5]) # start vector (should be n - dimensioned)
 
     print('Start vertex:', start_vertex)
     S = create_start_vectors(start_point=start_vertex)
@@ -268,7 +262,7 @@ if __name__ == '__main__':
 
     iterations = 0
     color = 'black'
-    while not stop_condition(S):
+    while not stop_condition(S, epsilon=epsilon):
         iterations += 1
         max_elem, index_of_max = find_max_value(f, S_arr=S, verbose=0)
 
@@ -308,8 +302,9 @@ if __name__ == '__main__':
         plt.show()
 
     print('Stop condition reached!\n')
-    stop_condition(verbose=2, S_arr=S)
+    stop_condition(verbose=2, epsilon=epsilon, S_arr=S)
 
     min_elem, index_of_min = find_max_value(f, S_arr=S, inverse=True)
     print('\nIterations completed:', iterations)
+    print(f'X: {S[:,index_of_min]}')
     print('Lowest function value: ', round(min_elem, 3))
